@@ -1,4 +1,5 @@
 import { Shield, FileCheck, Users, Award, CheckCircle, AlertTriangle } from 'lucide-react';
+import Image from 'next/image';
 
 export default function DueDiligence() {
   const services = [
@@ -67,7 +68,7 @@ export default function DueDiligence() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-slate-600  mb-6">
+              <h2 className="text-3xl font-bold text-slate-500 mb-6">
                 Why Due Diligence Matters
               </h2>
               <p className="text-lg text-slate-400 mb-6">
@@ -83,7 +84,7 @@ export default function DueDiligence() {
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <CheckCircle className="w-6 h-6 text-[#de261e] flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-200">{item}</span>
+                    <span className="text-slate-300">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -94,9 +95,9 @@ export default function DueDiligence() {
                   <div className="bg-[#fffc01]/20 p-2 rounded-lg">
                     <AlertTriangle className="w-6 h-6 text-[#de261e]" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">Stay Protected</h3>
+                  <h3 className="text-xl font-bold text-slate-500">Stay Protected</h3>
                 </div>
-                <p className="text-slate-600 mb-4">
+                <p className="text-slate-400 mb-4">
                   International recruitment scams cost job seekers millions each year. Our due diligence process helps you avoid:
                 </p>
                 <ul className="space-y-2 text-sm text-slate-700">
@@ -115,7 +116,7 @@ export default function DueDiligence() {
       <section className="bg-[#ffaeab]/10 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white/90  mb-4">
+            <h2 className="text-3xl font-bold text-slate-500 mb-4">
               Our Due Diligence Services
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
@@ -149,10 +150,10 @@ export default function DueDiligence() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white/90  mb-4">
+            <h2 className="text-3xl font-bold text-slate-400 mb-4">
               Our Verification Process
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
               A systematic approach to ensure complete transparency and compliance
             </p>
           </div>
@@ -161,7 +162,7 @@ export default function DueDiligence() {
             {process.map((item, index) => (
               <div key={index} className="relative">
                 <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#de261e]">
-                  <div className="text-5xl font-bold text-[#ffaeab]/70 mb-4">
+                  <div className="text-5xl font-bold text-[#ffaeab]/30 mb-4">
                     {item.step}
                   </div>
                   <h3 className="text-xl font-semibold text-slate-800 mb-3">
@@ -188,7 +189,7 @@ export default function DueDiligence() {
             <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
               We adhere to ILO conventions, local labor laws, and international best practices in recruitment and employment.
             </p>
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
               <div className="bg-white/10 backdrop-blur p-6 rounded-xl">
                 <div className="text-3xl font-bold mb-2">100%</div>
                 <div className="text-white/90">Compliance Rate</div>
@@ -201,6 +202,24 @@ export default function DueDiligence() {
                 <div className="text-3xl font-bold mb-2">15+</div>
                 <div className="text-white/90">Years Experience</div>
               </div>
+            </div>
+
+            {/* License Image */}
+            <div className="max-w-4xl mx-auto bg-white p-4 rounded-xl shadow-2xl">
+              <h3 className="text-2xl font-bold text-[#060709] mb-4">Our Official License</h3>
+              <div className="relative w-full h-auto">
+                <Image
+                  src="/license.png"
+                  alt="Official Recruitment License"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto rounded-lg shadow-lg"
+                  priority
+                />
+              </div>
+              <p className="text-sm text-[#060709] mt-4">
+                Licensed and certified by the Sri Lanka Bureau of Foreign Employment (SLBFE)
+              </p>
             </div>
           </div>
         </div>

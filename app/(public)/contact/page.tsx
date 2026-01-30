@@ -111,14 +111,13 @@ export default function Contact() {
             {/* Map Placeholder */}
             <div className="lg:row-span-2 bg-slate-200 rounded-2xl overflow-hidden">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.798467128446!2d79.84759931477298!3d6.927078995007607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae259692f4c5a8f%3A0x5c9f7c8c8c8c8c8c!2sColombo%2003%2C%20Sri%20Lanka!5e0!3m2!1sen!2slk!4v1234567890"
+                src="https://maps.google.com/maps?width=600&height=400&hl=en&q=mahanayake&t=&z=14&ie=UTF8&iwloc=B&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="grayscale"
               />
             </div>
 

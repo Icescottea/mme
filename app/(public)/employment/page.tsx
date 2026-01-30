@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, DollarSign, Clock, Briefcase, Search } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Briefcase, Search, Phone } from 'lucide-react';
 import Link from 'next/link';
 
 interface Job {
@@ -10,6 +10,7 @@ interface Job {
   category: string;
   location: string;
   salary_range: string;
+  contact: string;
   description: string;
   requirements: string;
   status: string;
@@ -32,39 +33,34 @@ export default function Employment() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedCategory]);
+  }, []); // Remove selectedCategory from dependency
 
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const url = selectedCategory === 'all' 
-        ? '/api/jobs?status=active'
-        : `/api/jobs?category=${selectedCategory}&status=active`;
+      // Always fetch all active jobs
+      const response = await fetch('/api/jobs?status=active');
       
-      const response = await fetch(url);
       if (response.ok) {
-        
-        const result = await response.json();
-        // handle common API shapes safely
-        const jobsArray = Array.isArray(result)
-          ? result
-          : result.data || result.jobs || [];
-        setJobs(jobsArray);
-
+        const data = await response.json();
+        setJobs(Array.isArray(data) ? data : []);
       } else {
         console.error('Failed to fetch jobs');
+        setJobs([]);
       }
     } catch (error) {
       console.error('Error fetching jobs:', error);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
   };
 
   const filteredJobs = jobs.filter(job => {
+    const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory;
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.location.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+    return matchesCategory && matchesSearch;
   });
 
   return (
@@ -177,13 +173,21 @@ export default function Employment() {
                     
                     <p className="text-slate-600 mb-4">{job.description}</p>
                     
-                    <Link
-                      href="/job-inquiry"
-                      className="inline-flex items-center gap-2 text-[#de261e] font-semibold hover:text-[#de261e]/80 transition-all duration-300 group-hover:gap-3"
-                    >
-                      Apply Now
-                      <Briefcase className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
-                    </Link>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[#de261e] font-semibold">
+                        <Phone className="w-4 h-4" />
+                        <a href={`tel:${job.contact}`} className="hover:text-[#de261e]/80 transition-colors">
+                          {job.contact}
+                        </a>
+                      </div>
+                      <Link
+                        href="/job-inquiry"
+                        className="inline-flex items-center gap-2 text-[#de261e] font-semibold hover:text-[#de261e]/80 transition-all duration-300 group-hover:gap-3"
+                      >
+                        Apply Now
+                        <Briefcase className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                      </Link>
+                    </div>
                   </div>
                 ))
                 ) : (
@@ -200,10 +204,10 @@ export default function Employment() {
       {/* CTA Section */}
       <section className="bg-[#ffaeab]/10 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-[#ffffff] mb-4">
+          <h2 className="text-3xl font-bold text-slate-50 mb-4">
             Don't See What You're Looking For?
           </h2>
-          <p className="text-lg text-fcfcfc mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-200 mb-8 max-w-2xl mx-auto">
             Submit a general inquiry and we'll notify you when relevant opportunities become available.
           </p>
           <Link

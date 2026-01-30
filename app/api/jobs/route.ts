@@ -1,10 +1,33 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-export async function GET() {
+// GET - Fetch all jobs
+export async function GET(request: Request) {
   try {
-    const result = await query('SELECT * FROM jobs ORDER BY created_at DESC');
-    return NextResponse.json({ jobs: result.rows });
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const status = searchParams.get('status');
+
+    let sql = 'SELECT * FROM jobs WHERE 1=1';
+    const params: any[] = [];
+    let paramCount = 0;
+
+    if (category && category !== 'all') {
+      paramCount++;
+      sql += ` AND category = $${paramCount}`;
+      params.push(category);
+    }
+
+    if (status) {
+      paramCount++;
+      sql += ` AND status = $${paramCount}`;
+      params.push(status);
+    }
+
+    sql += ' ORDER BY created_at DESC';
+
+    const result = await query(sql, params);
+    return NextResponse.json(result.rows);
   } catch (error) {
     console.error('Error fetching jobs:', error);
     return NextResponse.json(
@@ -14,27 +37,46 @@ export async function GET() {
   }
 }
 
+// POST - Create new job (Admin only)
 export async function POST(request: Request) {
   try {
+    // In production, verify JWT token here
     const body = await request.json();
-    const { title, category, location, salary_range, description, requirements, status } = body;
+    const { title, category, location, salary_range, contact, description, requirements, status } = body;
 
-    // Validate required fields
-    if (!title || !category || !location || !description) {
+    // Validation
+    if (!title || !category || !location || !description || !contact) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Title, category, location, contact, and description are required' },
         { status: 400 }
       );
     }
 
-    const result = await query(
-      `INSERT INTO jobs (title, category, location, salary_range, description, requirements, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [title, category, location, salary_range, description, requirements, status || 'active']
-    );
+    const sql = `
+      INSERT INTO jobs (title, category, location, salary_range, contact, description, requirements, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+    `;
 
-    return NextResponse.json({ job: result.rows[0] }, { status: 201 });
+    const result = await query(sql, [
+      title,
+      category,
+      location,
+      salary_range || null,
+      contact,
+      description,
+      requirements || null,
+      status || 'active',
+    ]);
+
+    return NextResponse.json(
+      { 
+        success: true, 
+        job: result.rows[0],
+        message: 'Job created successfully' 
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating job:', error);
     return NextResponse.json(
@@ -44,26 +86,47 @@ export async function POST(request: Request) {
   }
 }
 
+// PUT - Update job (Admin only)
 export async function PUT(request: Request) {
   try {
+    // In production, verify JWT token here
     const body = await request.json();
-    const { id, title, category, location, salary_range, description, requirements, status } = body;
+    const { id, title, category, location, salary_range, contact, description, requirements, status } = body;
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Job ID is required' },
+        { error: 'ID is required' },
         { status: 400 }
       );
     }
 
-    const result = await query(
-      `UPDATE jobs 
-       SET title = $1, category = $2, location = $3, salary_range = $4, 
-           description = $5, requirements = $6, status = $7, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $8
-       RETURNING *`,
-      [title, category, location, salary_range, description, requirements, status, id]
-    );
+    const sql = `
+      UPDATE jobs 
+      SET 
+        title = COALESCE($1, title),
+        category = COALESCE($2, category),
+        location = COALESCE($3, location),
+        salary_range = COALESCE($4, salary_range),
+        contact = COALESCE($5, contact),
+        description = COALESCE($6, description),
+        requirements = COALESCE($7, requirements),
+        status = COALESCE($8, status),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $9
+      RETURNING *
+    `;
+
+    const result = await query(sql, [
+      title,
+      category,
+      location,
+      salary_range,
+      contact,
+      description,
+      requirements,
+      status,
+      id,
+    ]);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -72,7 +135,10 @@ export async function PUT(request: Request) {
       );
     }
 
-    return NextResponse.json({ job: result.rows[0] });
+    return NextResponse.json({
+      success: true,
+      job: result.rows[0],
+    });
   } catch (error) {
     console.error('Error updating job:', error);
     return NextResponse.json(
@@ -82,19 +148,22 @@ export async function PUT(request: Request) {
   }
 }
 
+// DELETE - Delete job (Admin only)
 export async function DELETE(request: Request) {
   try {
+    // In production, verify JWT token here
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Job ID is required' },
+        { error: 'ID is required' },
         { status: 400 }
       );
     }
 
-    const result = await query('DELETE FROM jobs WHERE id = $1 RETURNING *', [id]);
+    const sql = 'DELETE FROM jobs WHERE id = $1 RETURNING id';
+    const result = await query(sql, [id]);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -103,7 +172,10 @@ export async function DELETE(request: Request) {
       );
     }
 
-    return NextResponse.json({ message: 'Job deleted successfully' });
+    return NextResponse.json({
+      success: true,
+      message: 'Job deleted successfully',
+    });
   } catch (error) {
     console.error('Error deleting job:', error);
     return NextResponse.json(

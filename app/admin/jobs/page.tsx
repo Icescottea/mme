@@ -11,6 +11,7 @@ interface Job {
   salary_range: string;
   description: string;
   requirements: string;
+  contact: string;
   status: string;
   created_at: string;
 }
@@ -21,12 +22,12 @@ export default function AdminJobs() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-
   const [formData, setFormData] = useState({
     title: '',
     category: '',
     location: '',
     salary_range: '',
+    contact: '',
     description: '',
     requirements: '',
     status: 'active',
@@ -44,10 +45,11 @@ export default function AdminJobs() {
         const data = await response.json();
         setJobs(Array.isArray(data) ? data : []);
       } else {
+        console.error('Failed to fetch jobs');
         setJobs([]);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching jobs:', error);
       setJobs([]);
     } finally {
       setLoading(false);
@@ -56,35 +58,51 @@ export default function AdminJobs() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     try {
       if (editingJob) {
+        // Update existing job
         const response = await fetch('/api/jobs', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: editingJob.id, ...formData }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: editingJob.id,
+            ...formData,
+          }),
         });
 
         if (response.ok) {
           const data = await response.json();
-          setJobs(jobs.map(j => (j.id === editingJob.id ? data.job : j)));
+          setJobs(jobs.map(job => 
+            job.id === editingJob.id ? data.job : job
+          ));
+        } else {
+          alert('Failed to update job');
         }
       } else {
+        // Create new job
         const response = await fetch('/api/jobs', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(formData),
         });
 
         if (response.ok) {
           const data = await response.json();
           setJobs([data.job, ...jobs]);
+        } else {
+          alert('Failed to create job');
         }
       }
 
       resetForm();
     } catch (error) {
-      console.error(error);
+      console.error('Error submitting job:', error);
+      alert('An error occurred');
     }
   };
 
@@ -95,6 +113,7 @@ export default function AdminJobs() {
       category: job.category,
       location: job.location,
       salary_range: job.salary_range,
+      contact: job.contact || '',
       description: job.description,
       requirements: job.requirements,
       status: job.status,
@@ -103,15 +122,21 @@ export default function AdminJobs() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure?')) return;
+    if (confirm('Are you sure you want to delete this job?')) {
+      try {
+        const response = await fetch(`/api/jobs?id=${id}`, {
+          method: 'DELETE',
+        });
 
-    try {
-      const response = await fetch(`/api/jobs?id=${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setJobs(jobs.filter(j => j.id !== id));
+        if (response.ok) {
+          setJobs(jobs.filter(job => job.id !== id));
+        } else {
+          alert('Failed to delete job');
+        }
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        alert('An error occurred');
       }
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -121,6 +146,7 @@ export default function AdminJobs() {
       category: '',
       location: '',
       salary_range: '',
+      contact: '',
       description: '',
       requirements: '',
       status: 'active',
@@ -136,8 +162,7 @@ export default function AdminJobs() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -146,7 +171,7 @@ export default function AdminJobs() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-[#de261e] text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2"
+            className="bg-[#de261e] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#de261e]/90 transition-colors flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Add New Job
@@ -161,8 +186,8 @@ export default function AdminJobs() {
               type="text"
               placeholder="Search jobs..."
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border rounded-lg"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#de261e] focus:border-transparent"
             />
           </div>
         </div>
@@ -219,59 +244,130 @@ export default function AdminJobs() {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full p-6">
-              <div className="flex justify-between mb-4">
-                <h2 className="text-xl font-bold">
-                  {editingJob ? 'Edit Job' : 'Add Job'}
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-slate-800">
+                  {editingJob ? 'Edit Job' : 'Add New Job'}
                 </h2>
-                <button onClick={resetForm}>
-                  <X />
+                <button onClick={resetForm} className="p-2 hover:bg-slate-100 rounded-lg">
+                  <X className="w-6 h-6" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input required placeholder="Title"
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Job Title *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#de261e]"
+                    />
+                  </div>
 
-                <input required placeholder="Category"
-                  value={formData.category}
-                  onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Category *
+                    </label>
+                    <select
+                      required
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select category</option>
+                      <option value="gulf">Gulf Countries</option>
+                      <option value="europe">Europe</option>
+                      <option value="asia">Asia Pacific</option>
+                      <option value="healthcare">Healthcare</option>
+                    </select>
+                  </div>
 
-                <input required placeholder="Location"
-                  value={formData.location}
-                  onChange={e => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.location}
+                      onChange={(e) => setFormData({...formData, location: e.target.value})}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
 
-                <input required placeholder="Salary Range"
-                  value={formData.salary_range}
-                  onChange={e => setFormData({ ...formData, salary_range: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Salary Range *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.salary_range}
+                      onChange={(e) => setFormData({...formData, salary_range: e.target.value})}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="$3,000 - $4,500"
+                    />
+                  </div>
+                </div>
 
-                <textarea required placeholder="Description"
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
 
-                <textarea required placeholder="Requirements"
-                  value={formData.requirements}
-                  onChange={e => setFormData({ ...formData, requirements: e.target.value })}
-                  className="w-full border p-2 rounded"
-                />
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Requirements *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={formData.requirements}
+                    onChange={(e) => setFormData({...formData, requirements: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
 
-                <div className="flex gap-2">
-                  <button type="submit" className="bg-[#de261e] text-white px-4 py-2 rounded">
-                    {editingJob ? 'Update' : 'Create'}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Status *
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#de261e] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#de261e]/90"
+                  >
+                    {editingJob ? 'Update Job' : 'Create Job'}
                   </button>
-                  <button type="button" onClick={resetForm} className="border px-4 py-2 rounded">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-3 border border-slate-300 rounded-lg font-semibold hover:bg-slate-50"
+                  >
                     Cancel
                   </button>
                 </div>
@@ -279,7 +375,6 @@ export default function AdminJobs() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
