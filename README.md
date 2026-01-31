@@ -2,7 +2,7 @@
 
 A modern, full-stack recruitment and workforce management website built with Next.js, TypeScript, and PostgreSQL.
 
-## 🚀 Features
+## Features
 
 ### Public Pages
 - **Home** - Agency overview with services and statistics
@@ -16,13 +16,13 @@ A modern, full-stack recruitment and workforce management website built with Nex
 - **Inquiry Management** - View and manage job inquiries
 - **Secure Authentication** - JWT-based login system
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js 18+ installed
 - PostgreSQL database
 - Git
 
-## 🛠️ Installation
+## Installation
 
 ### 1. Create Next.js Project
 
@@ -155,14 +155,14 @@ Add real images to `/public/images/` and update:
 - Service icons
 - About page photos
 
-## 🔐 Default Admin Credentials
+## Default Admin Credentials
 
 - **Email**: admin@agency.com
 - **Password**: admin123
 
-⚠️ **Change these immediately in production!**
+**Change these immediately in production!**
 
-## 📱 Running the Application
+## Running the Application
 
 ### Development
 
@@ -181,7 +181,7 @@ npm run build
 npm start
 ```
 
-## 🗄️ API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/auth/login` - Admin login
