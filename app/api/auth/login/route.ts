@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+// IMPORTANT: Replace this hashed password with your own
+// To generate: Run `node generate-hash.js` (see companion file)
+const ADMIN_USER = {
+  email: 'admin@agency.com',
+  // This is a bcrypt hash of 'admin123' - CHANGE THIS!
+  passwordHash: '$2a$10$rXK9ZhJFVGKEHKEQP.LYF.8bJQYQb5qZXvK5hYmYJHzKqYyJKGqhm',
+};
 
 export async function POST(request: Request) {
   try {
@@ -21,28 +22,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Query the admin table for the user
-    const { data: admin, error: dbError } = await supabase
-      .from('admin')
-      .select('*')
-      .eq('email', email)
-      .single();
-
-    if (dbError || !admin) {
-      console.error('Database error:', dbError);
+    // Check if user exists
+    if (email !== ADMIN_USER.email) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Verify password
-    // If passwords are hashed in your database, use bcrypt.compare
-    const isValidPassword = await bcrypt.compare(password, admin.password);
-    
-    // If passwords are stored in plain text (NOT RECOMMENDED), use:
-    // const isValidPassword = password === admin.password;
-    
+    // Verify password using bcrypt
+    const isValidPassword = await bcrypt.compare(password, ADMIN_USER.passwordHash);
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -60,10 +49,7 @@ export async function POST(request: Request) {
     }
 
     const token = jwt.sign(
-      { 
-        email: admin.email,
-        id: admin.id,
-      },
+      { email: email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -71,10 +57,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       token,
-      user: { 
-        email: admin.email,
-        id: admin.id,
-      },
+      user: { email },
     });
   } catch (error) {
     console.error('Login error:', error);
