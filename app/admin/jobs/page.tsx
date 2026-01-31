@@ -187,22 +187,22 @@ export default function AdminJobs() {
               placeholder="Search jobs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#de261e] focus:border-transparent"
+              className="w-full text-zinc-950 pl-12 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#de261e] focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Jobs Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-slate-700 rounded-lg shadow-md overflow-hidden">
           {loading ? (
             <div className="text-center py-12">
               <div className="w-12 h-12 border-4 border-[#de261e] border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="mt-4 text-slate-600">Loading jobs...</p>
+              <p className="mt-4 text-slate-800">Loading jobs...</p>
             </div>
           ) : (
             <>
               <table className="w-full">
-                <thead className="bg-slate-50 border-b">
+                <thead className="bg-slate-900 border-b">
                   <tr>
                     <th className="px-6 py-4 text-left">Job Title</th>
                     <th className="px-6 py-4 text-left">Category</th>
@@ -214,7 +214,7 @@ export default function AdminJobs() {
                 </thead>
                 <tbody>
                   {filteredJobs.map(job => (
-                    <tr key={job.id} className="border-t hover:bg-slate-50">
+                    <tr key={job.id} className="border-t hover:bg-slate-800">
                       <td className="px-6 py-4">{job.title}</td>
                       <td className="px-6 py-4">{job.category}</td>
                       <td className="px-6 py-4">{job.location}</td>
@@ -266,7 +266,7 @@ export default function AdminJobs() {
                       required
                       value={formData.title}
                       onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#de261e]"
+                      className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-[#de261e]"
                     />
                   </div>
 
@@ -278,7 +278,7 @@ export default function AdminJobs() {
                       required
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select category</option>
                       <option value="gulf">Gulf Countries</option>
@@ -297,7 +297,7 @@ export default function AdminJobs() {
                       required
                       value={formData.location}
                       onChange={(e) => setFormData({...formData, location: e.target.value})}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -310,7 +310,7 @@ export default function AdminJobs() {
                       required
                       value={formData.salary_range}
                       onChange={(e) => setFormData({...formData, salary_range: e.target.value})}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       placeholder="$3,000 - $4,500"
                     />
                   </div>
@@ -325,7 +325,7 @@ export default function AdminJobs() {
                     rows={4}
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -338,7 +338,7 @@ export default function AdminJobs() {
                     rows={3}
                     value={formData.requirements}
                     onChange={(e) => setFormData({...formData, requirements: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -349,7 +349,7 @@ export default function AdminJobs() {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border text-zinc-950 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -366,7 +366,7 @@ export default function AdminJobs() {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-6 py-3 border border-slate-300 rounded-lg font-semibold hover:bg-slate-50"
+                    className="px-6 py-3 border text-zinc-950 border-slate-300 rounded-lg font-semibold hover:bg-slate-50"
                   >
                     Cancel
                   </button>

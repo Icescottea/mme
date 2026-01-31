@@ -139,14 +139,6 @@ export default function Login() {
             </a>
           </div>
         </div>
-
-        {/* Demo Credentials Notice */}
-        <div className="mt-6 bg-[#fffc01]/20 border border-[#fffc01] rounded-lg p-4">
-          <p className="text-xs text-[#060709] text-center">
-            <strong>Demo Credentials:</strong><br />
-            Email: admin@agency.com | Password: admin123
-          </p>
-        </div>
       </div>
     </div>
   );
